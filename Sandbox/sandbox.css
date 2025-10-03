@@ -1,0 +1,22 @@
+body {
+    font-family: 'Inter', sans-serif;
+    overflow: hidden; /* Prevents scrollbars from appearing */
+    background-color: #111827; /* Dark background */
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#sandbox-container {
+    flex-grow: 1;
+    position: relative;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-color: #f3f4f6;
+}
