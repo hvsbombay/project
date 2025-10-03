@@ -37,6 +37,3 @@ The project is organized into modular components, each with its own HTML, CSS, a
 1. Clone the repository
 2. Open any HTML file in your browser to view the component
 3. Refer to the setup page for detailed instructions
-
-## Contribution
-Feel free to contribute to this project by submitting pull requests or opening issues.
