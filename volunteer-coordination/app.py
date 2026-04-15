@@ -7,8 +7,10 @@ from database import init_db, seed_demo_data, get_db
 import json
 import math
 
+import os
+
 app = Flask(__name__)
-app.secret_key = "volunteermatch-secret-2026"
+app.secret_key = os.environ.get("SECRET_KEY", "volunteermatch-dev-secret-change-in-prod")
 
 # Custom Jinja2 filter so templates can parse JSON strings stored in the DB
 app.jinja_env.filters["from_json"] = json.loads
@@ -286,8 +288,8 @@ def api_assign():
         conn.commit()
         flash("Assignment created successfully!", "success")
         result = {"status": "ok", "match_score": score}
-    except Exception as e:
-        result = {"error": str(e)}
+    except Exception:
+        result = {"error": "Could not create assignment. It may already exist."}
     conn.close()
     return jsonify(result)
 
@@ -336,4 +338,4 @@ def api_opportunities():
 if __name__ == "__main__":
     init_db()
     seed_demo_data()
-    app.run(debug=True, port=5000)
+    app.run(debug=os.environ.get("FLASK_DEBUG", "0") == "1", port=5000)

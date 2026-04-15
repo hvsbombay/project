@@ -100,29 +100,54 @@
 async function fetchMatches() {
   const volId = document.getElementById("volSelect").value;
   if (!volId) return;
-  const res   = await fetch("/api/match", {
+  const res  = await fetch("/api/match", {
     method: "POST",
     headers: {"Content-Type":"application/json"},
     body: JSON.stringify({volunteer_id: parseInt(volId)})
   });
   const data = await res.json();
   const el   = document.getElementById("matchResults");
-  if (!data.length) { el.innerHTML = '<p class="text-muted">No matches found.</p>'; return; }
-  const rows = data.map(o => `
-    <tr>
-      <td><strong>${o.title}</strong><br><small class="text-muted">${o.organization}</small></td>
-      <td>${o.city}</td>
-      <td>${o.category}</td>
-      <td><span class="badge ${o.match_pct>=80?'bg-success':o.match_pct>=60?'bg-warning text-dark':'bg-secondary'}">${o.match_pct}%</span></td>
-      <td><button class="btn btn-sm btn-outline-success" onclick="assign(${volId},${o.id},this)">Assign</button></td>
-    </tr>`).join("");
-  el.innerHTML = `
-    <table class="table table-hover table-sm align-middle">
-      <thead class="table-light">
-        <tr><th>Opportunity</th><th>City</th><th>Category</th><th>Score</th><th></th></tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>`;
+  el.textContent = "";
+  if (!data.length) {
+    const p = document.createElement("p");
+    p.className = "text-muted";
+    p.textContent = "No matches found.";
+    el.appendChild(p);
+    return;
+  }
+  const table = document.createElement("table");
+  table.className = "table table-hover table-sm align-middle";
+  const thead = table.createTHead();
+  const hrow = thead.insertRow();
+  ["Opportunity","City","Category","Score",""].forEach(h => {
+    const th = document.createElement("th");
+    th.textContent = h;
+    hrow.appendChild(th);
+  });
+  const tbody = table.createTBody();
+  data.forEach(o => {
+    const tr = tbody.insertRow();
+    // Opportunity cell
+    const td0 = tr.insertCell(); const strong = document.createElement("strong");
+    strong.textContent = o.title; const small = document.createElement("small");
+    small.className = "text-muted d-block"; small.textContent = o.organization;
+    td0.appendChild(strong); td0.appendChild(small);
+    // City
+    tr.insertCell().textContent = o.city;
+    // Category
+    tr.insertCell().textContent = o.category;
+    // Score badge
+    const tdScore = tr.insertCell(); const badge = document.createElement("span");
+    badge.className = "badge " + (o.match_pct>=80?"bg-success":o.match_pct>=60?"bg-warning text-dark":"bg-secondary");
+    badge.textContent = o.match_pct + "%"; tdScore.appendChild(badge);
+    // Assign button
+    const tdBtn = tr.insertCell(); const btn = document.createElement("button");
+    btn.className = "btn btn-sm btn-outline-success";
+    btn.textContent = "Assign";
+    btn.addEventListener("click", () => assign(parseInt(volId), o.id, btn));
+    tdBtn.appendChild(btn);
+  });
+  el.appendChild(table);
 }
 
 async function assign(volId, oppId, btn) {
