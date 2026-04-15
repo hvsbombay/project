@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Post Opportunity{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width:700px">
+  <h2 class="fw-bold mb-4"><i class="bi bi-plus-circle-fill text-success me-2"></i>Post an Opportunity</h2>
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      <form method="POST">
+        <div class="row g-3">
+          <div class="col-sm-8">
+            <label class="form-label fw-semibold">Title *</label>
+            <input type="text" name="title" class="form-control" required/>
+          </div>
+          <div class="col-sm-4">
+            <label class="form-label fw-semibold">Category *</label>
+            <select name="category" class="form-select" required>
+              <option value="">Select…</option>
+              {% for cat in ["Education","Healthcare","Relief","Construction","Technology","Media","Environment","Other"] %}
+              <option value="{{ cat }}">{{ cat }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label fw-semibold">Organisation *</label>
+            <input type="text" name="organization" class="form-control" required/>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label fw-semibold">City *</label>
+            <input type="text" name="city" class="form-control" required placeholder="e.g. Mumbai"/>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Required Skills * <small class="text-muted">(comma-separated)</small></label>
+            <input type="text" name="required_skills" class="form-control" required
+                   placeholder="e.g. Teaching, Communication"/>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label fw-semibold">Volunteers Needed</label>
+            <input type="number" name="volunteers_needed" class="form-control" value="1" min="1"/>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label fw-semibold">Schedule (days) *</label>
+            <div class="d-flex flex-wrap gap-2 mt-1">
+              {% for day in ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"] %}
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="schedule" value="{{ day }}" id="sday_{{ day }}"/>
+                <label class="form-check-label small" for="sday_{{ day }}">{{ day[:3] }}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label fw-semibold">Start Date</label>
+            <input type="date" name="start_date" class="form-control"/>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label fw-semibold">End Date</label>
+            <input type="date" name="end_date" class="form-control"/>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold">Description</label>
+            <textarea name="description" class="form-control" rows="3" placeholder="Describe the opportunity…"></textarea>
+          </div>
+          <div class="col-12 d-flex gap-2">
+            <button type="submit" class="btn btn-success px-4">
+              <i class="bi bi-check-lg me-1"></i>Post
+            </button>
+            <a href="/opportunities" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

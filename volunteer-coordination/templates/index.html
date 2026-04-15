@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Hero -->
+  <div class="hero-banner rounded-4 p-5 mb-4 text-white text-center">
+    <h1 class="display-5 fw-bold mb-2">
+      <i class="bi bi-heart-fill text-warning me-2"></i>VolunteerMatch
+    </h1>
+    <p class="lead mb-0">
+      Data-driven volunteer coordination that puts the right person in the right place — maximising social impact.
+    </p>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="card kpi-card text-center border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="kpi-icon text-primary"><i class="bi bi-people-fill"></i></div>
+          <div class="kpi-value">{{ total_vols }}</div>
+          <div class="kpi-label">Active Volunteers</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card kpi-card text-center border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="kpi-icon text-success"><i class="bi bi-briefcase-fill"></i></div>
+          <div class="kpi-value">{{ total_opps }}</div>
+          <div class="kpi-label">Open Opportunities</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card kpi-card text-center border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="kpi-icon text-warning"><i class="bi bi-check2-circle"></i></div>
+          <div class="kpi-value">{{ total_assign }}</div>
+          <div class="kpi-label">Confirmed Matches</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card kpi-card text-center border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="kpi-icon text-danger"><i class="bi bi-clock-history"></i></div>
+          <div class="kpi-value">{{ total_hours }}</div>
+          <div class="kpi-label">Hours of Impact</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts row -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white fw-semibold">
+          <i class="bi bi-pie-chart-fill text-primary me-2"></i>Opportunities by Category
+        </div>
+        <div class="card-body d-flex justify-content-center align-items-center">
+          <canvas id="categoryChart" style="max-height:260px;"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-7">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white fw-semibold">
+          <i class="bi bi-activity text-success me-2"></i>Recent Match Activity
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Volunteer</th><th>Opportunity</th>
+                  <th>Score</th><th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for m in recent_matches %}
+                <tr>
+                  <td><i class="bi bi-person-circle text-primary me-1"></i>{{ m.vol_name }}</td>
+                  <td class="text-truncate" style="max-width:160px">{{ m.opp_title }}</td>
+                  <td>
+                    <span class="badge bg-success">{{ (m.match_score*100)|int }}%</span>
+                  </td>
+                  <td>
+                    {% set sc = m.status %}
+                    <span class="badge
+                      {% if sc == 'confirmed' %}bg-primary
+                      {% elif sc == 'completed' %}bg-success
+                      {% elif sc == 'cancelled' %}bg-danger
+                      {% else %}bg-secondary{% endif %}">
+                      {{ sc|capitalize }}
+                    </span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick actions -->
+  <div class="row g-3">
+    <div class="col-sm-6 col-md-3">
+      <a href="/volunteers/add" class="btn btn-primary w-100 py-3">
+        <i class="bi bi-person-plus-fill d-block fs-3 mb-1"></i>
+        Register Volunteer
+      </a>
+    </div>
+    <div class="col-sm-6 col-md-3">
+      <a href="/opportunities/add" class="btn btn-success w-100 py-3">
+        <i class="bi bi-plus-circle-fill d-block fs-3 mb-1"></i>
+        Post Opportunity
+      </a>
+    </div>
+    <div class="col-sm-6 col-md-3">
+      <a href="/match" class="btn btn-warning w-100 py-3">
+        <i class="bi bi-magic d-block fs-3 mb-1"></i>
+        Run Smart Match
+      </a>
+    </div>
+    <div class="col-sm-6 col-md-3">
+      <a href="/assignments" class="btn btn-info w-100 py-3 text-white">
+        <i class="bi bi-journal-check d-block fs-3 mb-1"></i>
+        View Assignments
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const categories = {{ categories | tojson }};
+  const labels  = categories.map(c => c.category);
+  const values  = categories.map(c => c.cnt);
+  const colors  = ["#4e79a7","#f28e2b","#e15759","#76b7b2","#59a14f","#edc948","#b07aa1","#ff9da7"];
+  const ctx = document.getElementById("categoryChart").getContext("2d");
+  new Chart(ctx, {
+    type: "doughnut",
+    data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 2 }] },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: "bottom", labels: { font: { size: 12 } } } }
+    }
+  });
+</script>
+{% endblock %}

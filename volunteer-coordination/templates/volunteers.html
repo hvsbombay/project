@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Volunteers{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold"><i class="bi bi-people-fill text-primary me-2"></i>Volunteers</h2>
+    <a href="/volunteers/add" class="btn btn-primary">
+      <i class="bi bi-person-plus-fill me-1"></i>Register Volunteer
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <form class="row g-2" method="GET">
+        <div class="col-sm-4">
+          <select name="city" class="form-select">
+            <option value="">All Cities</option>
+            {% for c in cities %}
+            <option value="{{ c.city }}" {% if c.city == city_filter %}selected{% endif %}>{{ c.city }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-sm-5">
+          <input type="text" name="skill" class="form-control" placeholder="Filter by skill (e.g. Teaching)"
+                 value="{{ skill_filter }}"/>
+        </div>
+        <div class="col-sm-3">
+          <button type="submit" class="btn btn-outline-primary w-100">
+            <i class="bi bi-search me-1"></i>Search
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Cards grid -->
+  <div class="row g-3">
+    {% for v in volunteers %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card volunteer-card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <div class="avatar-circle me-3">{{ v.name[0] }}</div>
+            <div>
+              <h6 class="mb-0 fw-bold">{{ v.name }}</h6>
+              <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ v.city }}</small>
+            </div>
+          </div>
+          <p class="small text-muted mb-2">{{ v.bio[:90] ~ '…' if v.bio|length > 90 else v.bio }}</p>
+          <div class="mb-2">
+            {% for skill in v.skills.split(',') %}
+            <span class="badge bg-primary-subtle text-primary-emphasis me-1 mb-1">{{ skill.strip() }}</span>
+            {% endfor %}
+          </div>
+          <div class="small text-muted">
+            <i class="bi bi-calendar3 me-1"></i>
+            {% set avail = v.availability | from_json %}
+            {{ avail | join(', ') }}
+            &nbsp;|&nbsp;
+            <i class="bi bi-clock me-1"></i>{{ v.hours_week }}h/week
+          </div>
+        </div>
+        <div class="card-footer bg-transparent d-flex gap-2">
+          <a href="/match?vol={{ v.id }}" class="btn btn-sm btn-outline-success flex-fill">
+            <i class="bi bi-magic me-1"></i>Find Match
+          </a>
+          <a href="mailto:{{ v.email }}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-envelope"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center text-muted py-5">
+      <i class="bi bi-person-x fs-1 d-block mb-2"></i>No volunteers found.
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

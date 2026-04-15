@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Opportunities{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold"><i class="bi bi-briefcase-fill text-success me-2"></i>Opportunities</h2>
+    <a href="/opportunities/add" class="btn btn-success">
+      <i class="bi bi-plus-circle-fill me-1"></i>Post Opportunity
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <form class="row g-2" method="GET">
+        <div class="col-sm-4">
+          <select name="city" class="form-select">
+            <option value="">All Cities</option>
+            {% for c in cities %}
+            <option value="{{ c.city }}" {% if c.city == city_filter %}selected{% endif %}>{{ c.city }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-sm-4">
+          <select name="category" class="form-select">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+            <option value="{{ cat.category }}" {% if cat.category == cat_filter %}selected{% endif %}>{{ cat.category }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-sm-4">
+          <button type="submit" class="btn btn-outline-success w-100">
+            <i class="bi bi-funnel me-1"></i>Filter
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Cards -->
+  <div class="row g-3">
+    {% for o in opportunities %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card opp-card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+          <span class="badge cat-badge cat-{{ o.category|lower|replace(' ','-') }}">{{ o.category }}</span>
+          <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ o.city }}</small>
+        </div>
+        <div class="card-body">
+          <h6 class="fw-bold mb-1">{{ o.title }}</h6>
+          <p class="small text-muted mb-2">
+            <i class="bi bi-building me-1"></i>{{ o.organization }}
+          </p>
+          <p class="small mb-2">{{ o.description[:100] ~ '…' if o.description|length > 100 else o.description }}</p>
+          <div class="mb-2">
+            {% for skill in o.required_skills.split(',') %}
+            <span class="badge bg-success-subtle text-success-emphasis me-1 mb-1">{{ skill.strip() }}</span>
+            {% endfor %}
+          </div>
+          <div class="small text-muted">
+            <i class="bi bi-calendar3 me-1"></i>
+            {% set sched = o.schedule | from_json %}
+            {{ sched | join(', ') }}
+            &nbsp;|&nbsp;
+            <i class="bi bi-people me-1"></i>{{ o.volunteers_needed }} needed
+          </div>
+        </div>
+        <div class="card-footer bg-transparent">
+          {% if o.start_date %}
+          <small class="text-muted">
+            <i class="bi bi-calendar-event me-1"></i>{{ o.start_date }} → {{ o.end_date or '—' }}
+          </small>
+          {% endif %}
+          <a href="/match?opp={{ o.id }}" class="btn btn-sm btn-outline-success float-end">
+            <i class="bi bi-magic me-1"></i>Find Volunteers
+          </a>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center text-muted py-5">
+      <i class="bi bi-briefcase fs-1 d-block mb-2"></i>No opportunities found.
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
