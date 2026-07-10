@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}Smart Match{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold"><i class="bi bi-magic text-warning me-2"></i>Smart Match Engine</h2>
+    <span class="badge bg-warning text-dark fs-6">
+      {{ suggestions|length }} suggested pairings
+    </span>
+  </div>
+
+  <!-- How it works -->
+  <div class="alert alert-info border-0 shadow-sm mb-4">
+    <i class="bi bi-info-circle-fill me-2"></i>
+    <strong>Matching algorithm</strong> scores each volunteer–opportunity pair on
+    <em>skill overlap (50%)</em>, <em>schedule overlap (35%)</em>, and <em>city match (15%)</em>.
+    Only unassigned pairs with score &gt; 40% are shown.
+  </div>
+
+  <!-- On-demand match -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white fw-semibold">
+      <i class="bi bi-search me-2 text-primary"></i>Find Best Opportunities for a Volunteer
+    </div>
+    <div class="card-body">
+      <div class="row g-2 align-items-end">
+        <div class="col-sm-6">
+          <select id="volSelect" class="form-select">
+            <option value="">— select a volunteer —</option>
+            {% for v in volunteers %}
+            <option value="{{ v.id }}">{{ v.name }} ({{ v.city }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-sm-3">
+          <button class="btn btn-primary w-100" onclick="fetchMatches()">
+            <i class="bi bi-magic me-1"></i>Match Now
+          </button>
+        </div>
+      </div>
+      <div id="matchResults" class="mt-3"></div>
+    </div>
+  </div>
+
+  <!-- Pre-computed suggestions -->
+  <h5 class="fw-bold mb-3">Top Recommended Pairings</h5>
+  <div class="row g-3">
+    {% for s in suggestions %}
+    <div class="col-md-6 col-lg-4">
+      <div class="card match-card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+          <div>
+            <i class="bi bi-person-circle text-primary me-1"></i>
+            <strong>{{ s.volunteer.name }}</strong>
+          </div>
+          <span class="badge score-badge {% if s.score >= 0.8 %}bg-success{% elif s.score >= 0.6 %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+            {{ s.score_pct }}% match
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="mb-1 small text-muted">
+            <i class="bi bi-geo-alt me-1"></i>{{ s.volunteer.city }}
+            &nbsp;|&nbsp;
+            <i class="bi bi-clock me-1"></i>{{ s.volunteer.hours_week }}h/wk
+          </div>
+          <div class="mb-2">
+            {% for sk in s.volunteer.skills.split(',') %}
+            <span class="badge bg-primary-subtle text-primary-emphasis me-1">{{ sk.strip() }}</span>
+            {% endfor %}
+          </div>
+          <hr class="my-2"/>
+          <div class="small fw-semibold">{{ s.opportunity.title }}</div>
+          <div class="small text-muted mb-2">{{ s.opportunity.organization }} · {{ s.opportunity.city }}</div>
+          <div>
+            {% for sk in s.opportunity.required_skills.split(',') %}
+            <span class="badge bg-success-subtle text-success-emphasis me-1">{{ sk.strip() }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="card-footer bg-transparent">
+          <button class="btn btn-sm btn-success w-100"
+                  onclick="assign({{ s.volunteer.id }}, {{ s.opportunity.id }}, this)">
+            <i class="bi bi-check2 me-1"></i>Assign
+          </button>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center text-muted py-5">
+      <i class="bi bi-check-all fs-1 d-block mb-2"></i>All high-score pairings have already been assigned!
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function fetchMatches() {
+  const volId = document.getElementById("volSelect").value;
+  if (!volId) return;
+  const res  = await fetch("/api/match", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({volunteer_id: parseInt(volId)})
+  });
+  const data = await res.json();
+  const el   = document.getElementById("matchResults");
+  el.textContent = "";
+  if (!data.length) {
+    const p = document.createElement("p");
+    p.className = "text-muted";
+    p.textContent = "No matches found.";
+    el.appendChild(p);
+    return;
+  }
+  const table = document.createElement("table");
+  table.className = "table table-hover table-sm align-middle";
+  const thead = table.createTHead();
+  const hrow = thead.insertRow();
+  ["Opportunity","City","Category","Score",""].forEach(h => {
+    const th = document.createElement("th");
+    th.textContent = h;
+    hrow.appendChild(th);
+  });
+  const tbody = table.createTBody();
+  data.forEach(o => {
+    const tr = tbody.insertRow();
+    // Opportunity cell
+    const td0 = tr.insertCell(); const strong = document.createElement("strong");
+    strong.textContent = o.title; const small = document.createElement("small");
+    small.className = "text-muted d-block"; small.textContent = o.organization;
+    td0.appendChild(strong); td0.appendChild(small);
+    // City
+    tr.insertCell().textContent = o.city;
+    // Category
+    tr.insertCell().textContent = o.category;
+    // Score badge
+    const tdScore = tr.insertCell(); const badge = document.createElement("span");
+    badge.className = "badge " + (o.match_pct>=80?"bg-success":o.match_pct>=60?"bg-warning text-dark":"bg-secondary");
+    badge.textContent = o.match_pct + "%"; tdScore.appendChild(badge);
+    // Assign button
+    const tdBtn = tr.insertCell(); const btn = document.createElement("button");
+    btn.className = "btn btn-sm btn-outline-success";
+    btn.textContent = "Assign";
+    btn.addEventListener("click", () => assign(parseInt(volId), o.id, btn));
+    tdBtn.appendChild(btn);
+  });
+  el.appendChild(table);
+}
+
+async function assign(volId, oppId, btn) {
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+  const res  = await fetch("/api/assign", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({volunteer_id: volId, opportunity_id: oppId})
+  });
+  const data = await res.json();
+  if (data.status === "ok") {
+    btn.className = "btn btn-sm btn-secondary w-100 disabled";
+    btn.innerHTML = "✓ Assigned";
+    btn.closest(".card, tr")?.classList?.add("opacity-50");
+  } else {
+    btn.disabled = false;
+    btn.innerHTML = "⚠ " + (data.error || "Error");
+  }
+}
+</script>
+{% endblock %}

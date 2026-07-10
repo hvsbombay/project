@@ -1,0 +1,79 @@
+/* VolunteerMatch — Custom Styles */
+
+:root {
+  --vm-primary: #2563eb;
+  --vm-success: #16a34a;
+  --vm-warning: #d97706;
+}
+
+body {
+  background-color: #f8f9fb;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Hero banner */
+.hero-banner {
+  background: linear-gradient(135deg, #1d4ed8 0%, #0f766e 100%);
+}
+
+/* KPI cards */
+.kpi-card {
+  transition: transform .2s, box-shadow .2s;
+}
+.kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.1) !important;
+}
+.kpi-icon { font-size: 2.2rem; margin-bottom: .4rem; }
+.kpi-value { font-size: 2rem; font-weight: 700; line-height: 1; }
+.kpi-label { font-size: .8rem; color: #6b7280; text-transform: uppercase; letter-spacing: .05em; }
+
+/* Volunteer / opportunity cards */
+.volunteer-card,
+.opp-card,
+.match-card {
+  transition: transform .2s, box-shadow .2s;
+}
+.volunteer-card:hover,
+.opp-card:hover,
+.match-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,.09) !important;
+}
+
+/* Avatar circle */
+.avatar-circle {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--vm-primary);
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Category badges */
+.cat-badge { font-size: .75rem; padding: .3em .6em; border-radius: 30px; }
+.cat-education   { background: #dbeafe; color: #1e40af; }
+.cat-healthcare  { background: #dcfce7; color: #166534; }
+.cat-relief      { background: #fef9c3; color: #854d0e; }
+.cat-construction{ background: #fce7f3; color: #9d174d; }
+.cat-technology  { background: #f3e8ff; color: #6b21a8; }
+.cat-media       { background: #ffedd5; color: #9a3412; }
+.cat-environment { background: #d1fae5; color: #065f46; }
+.cat-other       { background: #f3f4f6; color: #374151; }
+
+/* Score badge */
+.score-badge { font-size: .85rem; padding: .3em .7em; }
+
+/* Table */
+.table > thead > tr > th { font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; }
+
+/* Navbar active */
+.navbar .nav-link.active { font-weight: 600; }
+
+/* Footer */
+.footer { font-size: .83rem; }
