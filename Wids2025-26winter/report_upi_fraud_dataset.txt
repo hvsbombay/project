@@ -1,0 +1,63 @@
+================================================================================
+UPI FRAUD DETECTION - COMPREHENSIVE ANALYSIS REPORT
+================================================================================
+
+1. DATASET INFORMATION
+--------------------------------------------------------------------------------
+Data source: e:\Wids2025-26winter\upi datasets-20260130T154306Z-3-001\upi datasets\upi_fraud_dataset.csv
+Total samples: 2666
+Features: 9
+Train samples: 2132
+Test samples: 534
+Fraud ratio (train): 0.5919
+Fraud ratio (test): 0.5918
+
+2. MODEL PERFORMANCE METRICS
+--------------------------------------------------------------------------------
+Accuracy:           0.9513 (95.13%)
+F1-Score:           0.9581
+AUC-ROC:            0.9911
+Cross-Val Mean:     0.9874
+Cross-Val Std:      0.0005
+
+3. CROSS-VALIDATION DETAILS
+--------------------------------------------------------------------------------
+Fold 1: 0.9877
+Fold 2: 0.9878
+Fold 3: 0.9867
+
+Mean: 0.9874 ± 0.0005
+
+4. CLASSIFICATION REPORT
+--------------------------------------------------------------------------------
+              precision    recall  f1-score   support
+
+           0       0.92      0.97      0.94       218
+           1       0.98      0.94      0.96       316
+
+    accuracy                           0.95       534
+   macro avg       0.95      0.95      0.95       534
+weighted avg       0.95      0.95      0.95       534
+
+5. CONFUSION MATRIX
+--------------------------------------------------------------------------------
+True Negatives:  211
+False Positives: 7
+False Negatives: 19
+True Positives:  297
+
+6. TOP 10 FEATURE IMPORTANCES
+--------------------------------------------------------------------------------
+trans_amount: 0.5637
+trans_hour: 0.2284
+category: 0.0785
+age: 0.0405
+zip: 0.0319
+state: 0.0221
+trans_day: 0.0205
+trans_month: 0.0143
+trans_year: 0.0000
+
+================================================================================
+END OF REPORT
+================================================================================
